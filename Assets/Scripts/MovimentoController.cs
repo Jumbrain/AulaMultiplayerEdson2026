@@ -5,10 +5,13 @@ using Fusion;
 public class MovimentoController : NetworkBehaviour
 {
     public CharacterController character;
+    public float speed = 2;
+    public Animator anim;
 
     public void Awake()
     {
         character = GetComponent<CharacterController>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     public override void FixedUpdateNetwork()
@@ -23,9 +26,15 @@ public class MovimentoController : NetworkBehaviour
             if(dir.magnitude > 0.1f)
             {
                 //movimento do personagem
-                character.Move(dir);
+                character.Move(dir * speed * Runner.DeltaTime);
                 //rotação do personagem
                 transform.rotation = Quaternion.LookRotation(dir);
+
+                anim.SetBool("isWalking", true);
+            }
+            else
+            {
+                anim.SetBool("isWalking", false);
             }
         }
     }
