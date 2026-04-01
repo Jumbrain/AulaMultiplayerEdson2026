@@ -6,6 +6,12 @@ using UnityEngine;
 public class CamController : NetworkBehaviour
 {
     public Camera mainCamera;
+
+    void Awake()
+    {
+        mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
+    }
+
     public override void Spawned()
     {
         if(HasInputAuthority)

@@ -2,40 +2,49 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+
 public class MovimentoController : NetworkBehaviour
 {
     public CharacterController character;
     public float speed = 2;
     public Animator anim;
+    public Rigidbody rb;
+    public float jumpForce;
+    public float rotateSpeed;
+    public float moveSpeed;
+
+    [Networked] public int Score { get; set; }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+
+    public void RPC_AddScore(int points)
+    {
+        Score += points;
+    }
 
     public void Awake()
     {
         character = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
+        rb = GetComponent<Rigidbody>();
     }
 
     public override void FixedUpdateNetwork()
     {
         if(HasStateAuthority)
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
+            float horDir = Input.GetAxis("Horizontal");
+            float verDir = Input.GetAxis("Vertical");
 
-            Vector3 dir = new Vector3(horizontal, 0, vertical);
-            
-            if(dir.magnitude > 0.1f)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                //movimento do personagem
-                character.Move(dir * speed * Runner.DeltaTime);
-                //rotação do personagem
-                transform.rotation = Quaternion.LookRotation(dir);
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
 
-                anim.SetBool("isWalking", true);
-            }
-            else
-            {
-                anim.SetBool("isWalking", false);
-            }
+            transform.Rotate(0, horDir * rotateSpeed, 0 );
+            Vector3 movement = new Vector3(0, 0, verDir);
+            transform.Translate(movement * moveSpeed * Time.deltaTime);
+
         }
     }
 }
